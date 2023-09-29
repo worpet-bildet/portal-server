@@ -130,9 +130,14 @@
         ==
       =/  charge  ;;  charge:docket  (~(got by charges) %portal)
       ?>  ?=([%glob *] href.docket.charge)
-      :_  this  :_  ~
-      :*  %pass  /glob  %agent  [our.bowl %docket]  %watch
-          /glob/portal/(scot %uv hash.glob-reference.href.docket.charge)
+      :_  this  
+      :~  :*  %pass  /glob  %agent  [our.bowl %docket]  %watch
+              /glob/portal/(scot %uv hash.glob-reference.href.docket.charge)
+          ==
+          ::  maybe it makes sense to watch directly from worpet-bildet?
+          :*  %pass  /next-docket  %arvo  %c  %warp  our.bowl  %portal  ~  
+              %next  %x  da+now.bowl  /desk/docket-0
+          ==
       ==
       ::
         %serve-dir
@@ -147,7 +152,6 @@
     ::
         %serve-glob
       =*  url-base  url-base.act
-      ~&  >  "serving glob"
       :-
       :~  [%pass url-base %arvo %e %disconnect [~ url-base]]
           [%pass url-base %arvo %e %connect [~ url-base] %file-server]
@@ -343,11 +347,18 @@
 ++  on-arvo
   |=  [=wire sign=sign-arvo]
   ^-  (quip card _this)
-  ?+  +<.sign  (on-arvo:def wire sign)
-      %bound
+  ::
+  ?:  ?=(%bound +<.sign)
     ?:  accepted.sign  [~ this]
     ~&  [dap.bowl %failed-to-bind path.binding.sign]
     [~ this(serving (~(del by serving) path.binding.sign))]
+  ::
+  ?+    wire    (on-arvo:def wire sign)
+      [%next-docket ~]
+    :_  this  :_  ~
+    :*  %pass  /poke-ourselves  %agent  [our.bowl %file-server]  %poke
+        %file-server-action  !>([%publish-portal ~])
+    ==    
   ==
 ::
 ++  on-leave  on-leave:def
