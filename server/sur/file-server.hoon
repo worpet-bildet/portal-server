@@ -1,7 +1,8 @@
 /-  glob
 |%
 +$  action
-  $%  ::  %serve-dir: from clay directory
+  $%  [%publish-portal ~]
+      ::  %serve-dir: from clay directory
       ::
       ::    url-base   site path to route from
       ::    clay-base  clay path to route to

@@ -68,6 +68,7 @@
       [%http-response-header !>(response-header.simple-payload)]
     =/  data-cage
       [%http-response-data !>(data.simple-payload)]
+    =+  (need data.simple-payload)
     :~  [%give %fact ~[/http-response/[eyre-id]] header-cage]
         [%give %fact ~[/http-response/[eyre-id]] data-cage]
         [%give %kick ~[/http-response/[eyre-id]] ~]

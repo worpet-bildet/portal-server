@@ -2,7 +2,7 @@
 ::
 ::  mounts HTTP endpoints for Landscape (and third-party) user applications
 ::
-/-  srv=file-server, glob
+/-  srv=file-server, glob, docket
 /+  *server, default-agent, verb, dbug
 |%
 +$  card  card:agent:gall
@@ -31,25 +31,7 @@
 ::
 ++  on-init
   ^-  (quip card _this)
-  |^
-  :_  %_  this
-          serving
-        %-  ~(gas by *^serving)
-        %+  turn
-          ^-  (list path)
-          [/ /'~landscape' ~]
-        |=(pax=path [pax [clay+/app/landscape %.n %.y]])
-      ==
-  :~  (connect /)
-      (connect /'~landscape')
-      [%pass /serve-who %arvo %e %serve [~ /who] %home /gen/who/hoon ~]
-  ==
-  ::
-  ++  connect
-    |=  =path
-    ^-  card
-    [%pass path %arvo %e %connect [~ path] %file-server]
-  --
+  `this
 ::
 ++  on-save  !>(state)
 ++  on-load
@@ -120,9 +102,14 @@
   |=  [=mark =vase]
   ^-  (quip card _this)
   |^
-  ?>  (team:title our.bowl src.bowl)
-  ?+  mark  (on-poke:def mark vase)
-      %file-server-action  (file-server-action !<(action:srv vase))
+  ?+  mark
+    ?>  (team:title our.bowl src.bowl)
+    (on-poke:def mark vase)
+    ::
+      %file-server-action
+    ?>  (team:title our.bowl src.bowl)
+    (file-server-action !<(action:srv vase))
+    ::
       %handle-http-request
     =+  !<([id=@ta req=inbound-request:eyre] vase)
     :_  this
@@ -135,6 +122,19 @@
     ^-  (quip card _this)
     |^
     ?-  -.act
+        %publish-portal
+      =/  charges  ;;  (map desk charge:docket)
+        =<  +
+        .^  noun  %gx
+            /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun
+        ==
+      =/  charge  ;;  charge:docket  (~(got by charges) %portal)
+      ?>  ?=([%glob *] href.docket.charge)
+      :_  this  :_  ~
+      :*  %pass  /glob  %agent  [our.bowl %docket]  %watch
+          /glob/portal/(scot %uv hash.glob-reference.href.docket.charge)
+      ==
+      ::
         %serve-dir
       =*  url-base  url-base.act
       ?:  (~(has by serving) url-base)
@@ -147,9 +147,11 @@
     ::
         %serve-glob
       =*  url-base  url-base.act
-      ?:  (~(has by serving) url-base)
-        ~|("url already bound to {<(~(got by serving) url-base.act)>}" !!)
-      :-  [%pass url-base %arvo %e %connect [~ url-base] %file-server]~
+      ~&  >  "serving glob"
+      :-
+      :~  [%pass url-base %arvo %e %disconnect [~ url-base]]
+          [%pass url-base %arvo %e %connect [~ url-base] %file-server]
+      ==
       this(serving (~(put by serving) url-base glob+glob.act public.act %.y))
     ::
         %unserve-dir
@@ -182,7 +184,8 @@
     =*  req       request.inbound-request
     =*  headers   header-list.req
     =/  req-line  (parse-request-line url.req)
-    ?.  =(method.req %'GET')  not-found:gen
+    ?.  =(method.req %'GET')  
+      not-found:gen
     =.  site.req-line
       %+  murn  site.req-line
       |=  =cord
@@ -209,7 +212,8 @@
       ==
     ::
     =/  [payload=simple-payload:http public=?]  (get-file req-line is-file)
-    ?:  public  payload
+    ?:  public  
+      payload
     (require-authorization-simple:app inbound-request payload)
     ::
     ++  get-file
@@ -318,10 +322,16 @@
   |=  =path
   ^-  (quip card _this)
   |^
-  ?>  (team:title our.bowl src.bowl)
-  ?+  path  (on-watch:def path)
-      [%http-response *]  [~ this]
-      [%all ~]            [(give [%configuration configuration]) this]
+  ?+  path  
+    ?>  (team:title our.bowl src.bowl)
+    (on-watch:def path)
+    ::
+      [%http-response *]  
+    [~ this]
+    ::
+      [%all ~]
+    ?>  (team:title our.bowl src.bowl)
+    [(give [%configuration configuration]) this]
   ==
   ::
    ++  give
@@ -358,6 +368,20 @@
     =/  url  t.t.path
     ``noun+!>((~(has by serving) url))
   ==
-++  on-agent  on-agent:def
+++  on-agent
+  ::  /apps/portal?
+  |=  [=wire =sign:agent:gall]
+  ^-  (quip card _this)
+  ?+    wire    (on-agent:def wire sign)
+      [%glob ~]
+    ?+    -.sign    (on-agent:def wire sign)
+        %fact
+      =/  glob  !<(glob:docket q.cage.sign)
+      :_  this  :_  ~
+      :*  %pass  /serve-glob  %agent  [our.bowl %file-server]  %poke
+          %file-server-action  !>([%serve-glob /apps/portal glob %.y])
+      ==
+    ==
+  ==
 ++  on-fail   on-fail:def
 --
